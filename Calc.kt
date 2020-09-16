@@ -71,7 +71,7 @@ class Calc {
                     var number = 0
 
                     while (exp[index].isDigit()) {
-                        number = number * 10 + (exp[index] - '0')
+                        number = (number * 10) + (exp[index] - '0')
                         index++
                     }
 

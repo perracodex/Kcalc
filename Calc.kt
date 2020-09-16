@@ -1,8 +1,7 @@
 
 class Calc {
 
-    private fun manageNegative(exp: String, index: Int,
-                               operators: ArrayDeque<Char>, operands: ArrayDeque<Float>): Boolean {
+    private fun manageNegative(exp: String, index: Int, operators: ArrayDeque<Char>, operands: ArrayDeque<Float>): Boolean {
 
         val isNegative = (index == 0)
                 || (exp[index - 1] == '(')
@@ -51,7 +50,9 @@ class Calc {
                     operators.addFirst(current)
                 }
                 current == ')' ->  {
-                    while (!operators.isEmpty() && operators.first() != '(') compute(operators, operands)
+                    while (!operators.isEmpty() && operators.first() != '(') 
+                        this.compute(operators, operands)
+                    
                     operators.removeFirst()
                 }
                 current == '-' && manageNegative(exp, index, operators, operands) -> {

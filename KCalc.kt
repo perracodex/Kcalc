@@ -63,13 +63,13 @@ class KCalc {
      */
     private fun parseNumber(expression: String, index: Int, operands: ArrayDeque<Float>): Int {
         val number = StringBuilder()
-        var i = index
-        while (i < expression.length && isPartOfNumber(expression[i])) {
-            number.append(expression[i])
-            i++
+        var newIndex = index
+        while (newIndex < expression.length && isPartOfNumber(expression[newIndex])) {
+            number.append(expression[newIndex])
+            newIndex++
         }
         operands.addFirst(number.toString().toFloat())
-        return i - 1  // Return the updated index
+        return newIndex - 1
     }
 
     /**

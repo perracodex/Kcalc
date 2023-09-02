@@ -1,25 +1,84 @@
+/**
+ * KCalc is a class that evaluates arithmetic expressions.
+ */
+class KCalc {
 
-class Calc {
-
+    /**
+     * Handles the negative numbers and unary minus.
+     */
     private fun manageNegative(exp: String, index: Int, operators: ArrayDeque<Char>, operands: ArrayDeque<Float>): Boolean {
+        // Check if '-' is a unary minus
+        val isNegative = (index == 0) || (exp[index - 1] == '(') || (exp[index - 1] != ')' && !exp[index - 1].isDigit())
 
-        val isNegative = (index == 0)
-                || (exp[index - 1] == '(')
-                || (exp[index - 1] != ')' && !exp[index - 1].isDigit())
-
+        // If it's unary minus, push -1 and * to implement it as multiplication
         if (isNegative) {
-            operators.add('*')
-            operands.add(-1.0f)
+            operands.addFirst(-1.0f)
+            operators.addFirst('*')
         }
-
         return isNegative
     }
 
+    /**
+     * Handles the open parenthesis character in the expression.
+     */
+    private fun handleOpenParenthesis(operators: ArrayDeque<Char>) {
+        operators.addFirst('(')
+    }
+
+    /**
+     * Handles the close parenthesis character in the expression.
+     */
+    private fun handleCloseParenthesis(operators: ArrayDeque<Char>, operands: ArrayDeque<Float>) {
+        while (operators.first() != '(') {
+            compute(operators, operands)
+        }
+        operators.removeFirst()
+    }
+
+    /**
+     * Handles other operators in the expression.
+     */
+    private fun handleOperator(
+        current: Char,
+        operators: ArrayDeque<Char>,
+        precedenceMap: MutableMap<Char, Int>,
+        operands: ArrayDeque<Float>
+    ) {
+        val precedence = precedenceMap[current]!!
+        while (operators.isNotEmpty() && precedenceMap.getOrDefault(operators.first(), 0) >= precedence) {
+            compute(operators, operands)
+        }
+        operators.addFirst(current)
+    }
+
+    /**
+     * Checks if the given character is a digit, a decimal point, or an exponent (E/e).
+     */
+    private fun isPartOfNumber(ch: Char): Boolean {
+        return ch.isDigit() || ch == '.' || ch.uppercase() == "E"
+    }
+
+    /**
+     * Parses the number from the expression starting from the current index.
+     */
+    private fun parseNumber(expression: String, index: Int, operands: ArrayDeque<Float>): Int {
+        val number = StringBuilder()
+        var i = index
+        while (i < expression.length && isPartOfNumber(expression[i])) {
+            number.append(expression[i])
+            i++
+        }
+        operands.addFirst(number.toString().toFloat())
+        return i - 1  // Return the updated index
+    }
+
+    /**
+     * Computes the result of a sub-expression.
+     */
     private fun compute(operators: ArrayDeque<Char>, operands: ArrayDeque<Float>) {
         val action = operators.removeFirst()
         val right = operands.removeFirst()
         val left = operands.removeFirst()
-
         when (action) {
             '-' -> operands.addFirst(left - right)
             '+' -> operands.addFirst(left + right)
@@ -28,65 +87,57 @@ class Calc {
         }
     }
 
+    /**
+     * Solves the arithmetic expression.
+     */
     fun solve(source: String): Float {
-        val exp = "(" + source.replace(" ", "") + ")"
+        // Preprocess the expression string.
+        val expression = "(" + source.replace(" ", "") + ")"
 
-        val precedenceMap: MutableMap<Char, Int> = HashMap()
-        precedenceMap['-'] = 1
-        precedenceMap['+'] = 1
-        precedenceMap['/'] = 2
-        precedenceMap['*'] = 2
+        // Define operator precedence.
+        val precedenceMap: MutableMap<Char, Int> = mutableMapOf('-' to 1, '+' to 1, '/' to 2, '*' to 2)
 
+        // Create stacks for operators and operands
         val operators = ArrayDeque<Char>()
         val operands = ArrayDeque<Float>()
 
         var index = 0
 
-        while (index < exp.length) {
-            val current = exp[index]
-
+        // Parse and evaluate the expression
+        while (index < expression.length) {
+            val current = expression[index]
             when {
-                current == '(' -> {
-                    operators.addFirst(current)
-                }
-                current == ')' ->  {
-                    while (!operators.isEmpty() && operators.first() != '(') 
-                        this.compute(operators, operands)
-                    
-                    operators.removeFirst()
-                }
-                current == '-' && manageNegative(exp, index, operators, operands) -> {
+                // Case for open parenthesis character in the expression.
+                (current == '(') ->
+                    handleOpenParenthesis(operators)
+
+                // Case for close parenthesis character in the expression.
+                (current == ')') ->
+                    handleCloseParenthesis(operators, operands)
+
+                // Case for negative numbers and unary minus.
+                ((current == '-') && manageNegative(expression, index, operators, operands)) -> {
                     index++
                     continue
                 }
-                precedenceMap.containsKey(current) -> {
-                    val precedence = precedenceMap[current]!!
 
-                    while (!operators.isEmpty() && precedenceMap.getOrDefault(operators.first(), 0) >= precedence)
-                        this.compute(operators, operands)
+                // Case for other operators in the expression.
+                precedenceMap.containsKey(current) ->
+                    handleOperator(current, operators, precedenceMap, operands)
 
-                    operators.addFirst(current)
-                }
-                else -> {
-                    var number = 0
-
-                    while (exp[index].isDigit()) {
-                        number = (number * 10) + (exp[index] - '0')
-                        index++
-                    }
-
-                    operands.addFirst(number.toFloat())
-                    index--
-                }
+                // Case for parsing the number from the expression starting from the current index.
+                else ->
+                    index = parseNumber(expression, index, operands)  // Update index after parsing number
             }
-
             index++
         }
 
+        // Return the final result
         return operands.removeFirst()
     }
 }
 
-fun main(args: Array<String>) {
-    println(Calc().solve("1+(-2*-7)*((-4/2)+-3)*12/-4"))
+fun main() {
+    val result = KCalc().solve("1 + (-2 * -7) * ((-4 / 2) + -3) * 12 / -4 + 2.0E4 + 100.E2 / 7E2 * (-2.5)")
+    println(result)  // Should output 20175.285
 }

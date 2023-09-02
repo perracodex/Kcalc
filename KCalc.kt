@@ -54,7 +54,6 @@ class KCalc {
         return operands.removeFirst()
     }
 
-
     /**
      * Handles the open parenthesis character in the expression.
      */

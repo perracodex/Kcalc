@@ -138,6 +138,6 @@ class KCalc {
 }
 
 fun main() {
-    val result = KCalc().solve("1 + (-2 * -7) * ((-4 / 2) + -3) * 12 / -4 + 2.0E4 + 100.E2 / 7E2 * (-2.5)")
-    println(result)  // Should output 20175.285
+    val result = KCalc().solve("1 + ((-2) * -7) * ((-4 / 2) + -3) * 12 / -4 + 2.0E4 + 100.E2 / 7E2")
+    println(result)  // Should output 20225.285
 }

@@ -1,5 +1,5 @@
 /**
- * KCalc is a class that evaluates arithmetic expressions.
+ * Evaluates arithmetic expressions.
  */
 class KCalc {
 

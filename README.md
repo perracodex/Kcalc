@@ -1,5 +1,5 @@
 # KCalc
-Very simple and basic math expression evaluator in Kotlin, allowing to compute experssions as next:
+Very simple math expression evaluator in Kotlin, allowing to compute experssions as next:
 
 ```
 fun main() {
